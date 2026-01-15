@@ -37,6 +37,8 @@ export default function LoginPage() {
         password,
       });
 
+      
+
       // Set the token from the response
       const { token } = response.data;
       setCookie("token", token);
