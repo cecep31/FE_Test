@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function Sidebar() {
+  const [isLaporanLatinOpen, setIsLaporanLatinOpen] = useState(false);
+
   return (
     <div className="w-64 bg-gray-800 text-white flex flex-col">
       <div className="h-16 flex items-center justify-center bg-gray-900">
@@ -22,13 +27,26 @@ export default function Sidebar() {
           <Image src="/window.svg" alt="Master Gerbang" width={24} height={24} />
           <span className="ml-3">Master Gerbang</span>
         </Link>
-        <Link
-          href="/dashboard/laporan-latin"
-          className="flex items-center px-2 py-2.5 rounded-md hover:bg-gray-700"
-        >
-          <Image src="/file.svg" alt="Laporan Latin" width={24} height={24} />
-          <span className="ml-3">Laporan Latin</span>
-        </Link>
+        <div>
+          <button
+            onClick={() => setIsLaporanLatinOpen(!isLaporanLatinOpen)}
+            className="w-full flex items-center px-2 py-2.5 rounded-md hover:bg-gray-700"
+          >
+            <Image src="/file.svg" alt="Laporan Latin" width={24} height={24} />
+            <span className="ml-3">Laporan Latin</span>
+            <span className="ml-auto">{isLaporanLatinOpen ? "▼" : "▶"}</span>
+          </button>
+          {isLaporanLatinOpen && (
+            <div className="ml-6 mt-1 space-y-1">
+              <Link
+                href="/dashboard/laporan-latin/per-hari"
+                className="flex items-center px-2 py-2 rounded-md hover:bg-gray-700 text-sm"
+              >
+                <span>Per Hari</span>
+              </Link>
+            </div>
+          )}
+        </div>
       </nav>
       <div className="px-2 py-4">
         <button className="w-full flex items-center px-2 py-2.5 rounded-md bg-red-600 hover:bg-red-700">
