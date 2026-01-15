@@ -47,7 +47,7 @@ const navItems = [
     icon: FileText,
     items: [
       {
-        title: "Per Hari",
+        title: "Laporan Per Hari",
         href: "/dashboard/laporan-latin/per-hari",
       },
     ],
