@@ -21,6 +21,21 @@ import {
 } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Pencil, Trash2, Search, Plus, X, Building2, Hash, MapPin, AlertTriangle } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Gerbang {
   id: number;
@@ -69,12 +84,21 @@ export default function MasterGerbang() {
   const [deleteData, setDeleteData] = useState<{ id: number; IdCabang: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState("10");
 
-  const fetchGerbang = async (search?: string) => {
+  const fetchGerbang = async (search?: string, page?: number, limit?: string) => {
     try {
       const params = new URLSearchParams();
       if (search) {
         params.append("NamaGerbang", search);
+      }
+      if (page) {
+        params.append("page", page.toString());
+      }
+      if (limit) {
+        params.append("limit", limit);
       }
       const response = await axiosInstance.get<GerbangResponse>(
         `/gerbangs?${params.toString()}`
@@ -83,6 +107,7 @@ export default function MasterGerbang() {
 
       if (data.status && data.data?.rows?.rows) {
         setGerbangData(data.data.rows.rows);
+        setTotalPages(data.data.total_pages);
       } else {
         setError(data.message || "Failed to fetch data");
       }
@@ -97,11 +122,11 @@ export default function MasterGerbang() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(true);
-      fetchGerbang(searchQuery);
+      fetchGerbang(searchQuery, currentPage, pageSize);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, currentPage, pageSize]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -113,10 +138,21 @@ export default function MasterGerbang() {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    setCurrentPage(1);
   };
 
   const clearSearch = () => {
     setSearchQuery("");
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handlePageSizeChange = (value: string) => {
+    setPageSize(value);
+    setCurrentPage(1);
   };
 
   const openCreateModal = () => {
@@ -164,7 +200,7 @@ export default function MasterGerbang() {
       } else {
         await axiosInstance.post("/gerbangs", formData);
       }
-      await fetchGerbang();
+      await fetchGerbang(searchQuery, currentPage, pageSize);
       closeModal();
     } catch (err) {
       console.error("Failed to save gerbang:", err);
@@ -179,7 +215,7 @@ export default function MasterGerbang() {
     setSubmitting(true);
     try {
       await axiosInstance.delete(`/gerbang`, { data: deleteData });
-      await fetchGerbang();
+      await fetchGerbang(searchQuery, currentPage, pageSize);
       closeDeleteModal();
     } catch (err) {
       console.error("Failed to delete gerbang:", err);
@@ -234,7 +270,7 @@ export default function MasterGerbang() {
             onClick={() => {
               setError(null);
               setLoading(true);
-              fetchGerbang();
+              fetchGerbang(searchQuery, currentPage, pageSize);
             }}
           >
             Coba Lagi
@@ -371,6 +407,76 @@ export default function MasterGerbang() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white">
+            <div className="flex items-center gap-2 text-sm text-slate-600 border rounded px-2 py-1">
+              <span>Show :</span>
+              <Select value={pageSize} onValueChange={handlePageSizeChange}>
+                <SelectTrigger className="h-8 w-[100px] border-none shadow-none focus:ring-0">
+                  <SelectValue placeholder="10 entries" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 entries</SelectItem>
+                  <SelectItem value="10">10 entries</SelectItem>
+                  <SelectItem value="25">25 entries</SelectItem>
+                  <SelectItem value="50">50 entries</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Pagination className="w-auto mx-0">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                    className={`bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200 ${
+                      currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
+                    }`}
+                  />
+                </PaginationItem>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) pageNum = i + 1;
+                  else if (currentPage <= 3) pageNum = i + 1;
+                  else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                  else pageNum = currentPage - 2 + i;
+
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        onClick={() => handlePageChange(pageNum)}
+                        isActive={currentPage === pageNum}
+                        className={currentPage === pageNum ? "bg-white border-slate-300 text-slate-900" : "cursor-pointer text-slate-600"}
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+                {totalPages > 5 && currentPage < totalPages - 2 && (
+                  <PaginationItem>
+                    <span className="px-2">...</span>
+                  </PaginationItem>
+                )}
+                {totalPages > 5 && currentPage < totalPages - 2 && (
+                  <PaginationItem>
+                    <PaginationLink onClick={() => handlePageChange(totalPages)} className="cursor-pointer">
+                      {totalPages}
+                    </PaginationLink>
+                  </PaginationItem>
+                )}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                    className={`bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200 ${
+                      currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"
+                    }`}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
       </div>
 
@@ -464,8 +570,9 @@ export default function MasterGerbang() {
             <div className="pt-6 flex gap-4">
               <Button
                 type="button"
+                variant="outline"
                 onClick={closeModal}
-                className="flex-1 h-11 border-slate-300 text-slate-700 hover:bg-slate-50"
+                className="flex-1 h-11"
               >
                 Batal
               </Button>
@@ -505,8 +612,9 @@ export default function MasterGerbang() {
           </SheetHeader>
           <div className="flex gap-4 mt-8 px-6">
             <Button
+              variant="outline"
               onClick={closeDeleteModal}
-              className="flex-1 h-11 border-slate-300 text-slate-700 hover:bg-slate-50"
+              className="flex-1 h-11"
             >
               Batal
             </Button>

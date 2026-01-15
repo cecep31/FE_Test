@@ -64,10 +64,11 @@ export default function AppSidebar() {
       <Sidebar className="border-r">
         <SidebarHeader className="py-4">
           <div className="flex items-center gap-2 px-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Globe className="h-5 w-5" />
-            </div>
-            <span className="text-lg font-semibold">Dashboard</span>
+            <img
+              src="/next.svg"
+              alt="App Logo"
+              className="h-10 w-10 object-contain"
+            />
           </div>
         </SidebarHeader>
 
@@ -100,9 +101,7 @@ export default function AppSidebar() {
                                 asChild
                                 isActive={isActive(subItem.href)}
                               >
-                                <Link href={subItem.href}>
-                                  {subItem.title}
-                                </Link>
+                                <Link href={subItem.href}>{subItem.title}</Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
                           ))}
@@ -111,7 +110,10 @@ export default function AppSidebar() {
                     ) : (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <SidebarMenuButton asChild isActive={isActive(item.href!)}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive(item.href!)}
+                          >
                             <Link href={item.href!}>
                               <item.icon className="h-4 w-4" />
                               <span>{item.title}</span>
@@ -129,8 +131,6 @@ export default function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-
-
       </Sidebar>
     </TooltipProvider>
   );
