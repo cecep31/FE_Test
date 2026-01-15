@@ -175,8 +175,51 @@ export default function Dashboard() {
   const gerbangData = processGerbangData();
   const ruasData = processRuasData();
 
-  const SHIFT_COLORS = ["#64748b", "#475569", "#334155"];
-  const RUAS_COLORS = ["#64748b", "#475569", "#334155"];
+  const SHIFT_COLORS = ["#3b82f6", "#10b981", "#f59e0b"];
+  const RUAS_COLORS = ["#8b5cf6", "#ec4899", "#06b6d4", "#84cc16"];
+  const BANK_COLORS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4"];
+
+  // Custom label for doughnut charts
+  const renderCustomizedLabel = ({
+    cx, cy, midAngle, innerRadius, outerRadius, percent
+  }: {
+    cx: number;
+    cy: number;
+    midAngle: number;
+    innerRadius: number;
+    outerRadius: number;
+    percent: number;
+  }) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    if (percent < 0.05) return null;
+
+    return (
+      <g>
+        <rect
+          x={x - 20}
+          y={y - 10}
+          width={40}
+          height={20}
+          fill="rgba(0, 0, 0, 0.7)"
+          rx={4}
+        />
+        <text 
+          x={x} 
+          y={y} 
+          fill="white" 
+          textAnchor="middle" 
+          dominantBaseline="central"
+          className="text-xs font-semibold"
+        >
+          {`${(percent * 100).toFixed(0)}%`}
+        </text>
+      </g>
+    );
+  };
 
   if (loading) {
     return (
@@ -263,50 +306,81 @@ export default function Dashboard() {
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                 }}
               />
-              <Bar dataKey="Jumlah Lalin" fill="#64748b" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Jumlah Lalin" fill="#3b82f6" radius={[4, 4, 0, 0]}>
+                {eTollData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={BANK_COLORS[index % BANK_COLORS.length]} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Shift Pie Chart */}
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
-          <h2 className="text-lg font-semibold mb-4 text-slate-700">Total Lalin per Shift</h2>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-slate-700">Total Lalin per Shift</h2>
+            <div className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-medium">
+              {shiftData.reduce((sum, item) => sum + item.value, 0).toLocaleString('id-ID')} Total
+            </div>
+          </div>
           <div className="flex items-center justify-between">
-            <ResponsiveContainer width="60%" height={300}>
+            <ResponsiveContainer width="60%" height={320}>
               <PieChart>
                 <Pie
                   data={shiftData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={3}
+                  innerRadius={70}
+                  outerRadius={110}
+                  paddingAngle={2}
                   dataKey="value"
+                  animationBegin={0}
+                  animationDuration={800}
+                  animationEasing="ease-out"
+                  label={renderCustomizedLabel}
+                  labelLine={false}
                 >
                   {shiftData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={SHIFT_COLORS[index % SHIFT_COLORS.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={SHIFT_COLORS[index % SHIFT_COLORS.length]}
+                      stroke="#fff"
+                      strokeWidth={2}
+                    />
                   ))}
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "rgba(255, 255, 255, 0.95)",
+                    backgroundColor: "rgba(255, 255, 255, 0.98)",
                     border: "1px solid #e2e8f0",
                     borderRadius: "12px",
-                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+                    padding: "12px",
                   }}
+                  formatter={(value: number) => [value.toLocaleString('id-ID'), 'Jumlah Lalin']}
                 />
               </PieChart>
             </ResponsiveContainer>
             <div className="flex flex-col gap-3">
-              <h3 className="font-semibold text-sm mb-2 text-slate-700">Total Lalin</h3>
+              <h3 className="font-semibold text-sm mb-3 text-slate-700">Distribusi Shift</h3>
               {shiftData.map((entry, index) => (
-                <div key={entry.name} className="flex items-center gap-2">
+                <div 
+                  key={entry.name} 
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors group"
+                >
                   <div
-                    className="w-3 h-3 rounded-full"
+                    className="w-4 h-4 rounded-full shadow-sm group-hover:scale-110 transition-transform"
                     style={{ backgroundColor: SHIFT_COLORS[index % SHIFT_COLORS.length] }}
                   />
-                  <span className="text-sm text-slate-600">{entry.name}</span>
-                  <span className="text-sm font-semibold ml-auto">{entry.percentage}%</span>
+                  <div className="flex-1">
+                    <span className="text-sm font-medium text-slate-700">{entry.name}</span>
+                    <div className="text-xs text-slate-500">
+                      {entry.value.toLocaleString('id-ID')} lalin
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-bold text-slate-900">{entry.percentage}%</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -329,50 +403,77 @@ export default function Dashboard() {
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                 }}
               />
-              <Bar dataKey="Jumlah Lalin" fill="#64748b" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Jumlah Lalin" fill="#10b981" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Ruas Pie Chart */}
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
-          <h2 className="text-lg font-semibold mb-4 text-slate-700">Total Lalin per Ruas</h2>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-slate-700">Total Lalin per Ruas</h2>
+            <div className="bg-purple-50 text-purple-600 px-3 py-1 rounded-full text-xs font-medium">
+              {ruasData.reduce((sum, item) => sum + item.value, 0).toLocaleString('id-ID')} Total
+            </div>
+          </div>
           <div className="flex items-center justify-between">
-            <ResponsiveContainer width="60%" height={300}>
+            <ResponsiveContainer width="60%" height={320}>
               <PieChart>
                 <Pie
                   data={ruasData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={3}
+                  innerRadius={70}
+                  outerRadius={110}
+                  paddingAngle={2}
                   dataKey="value"
+                  animationBegin={0}
+                  animationDuration={800}
+                  animationEasing="ease-out"
+                  label={renderCustomizedLabel}
+                  labelLine={false}
                 >
                   {ruasData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={RUAS_COLORS[index % RUAS_COLORS.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={RUAS_COLORS[index % RUAS_COLORS.length]}
+                      stroke="#fff"
+                      strokeWidth={2}
+                    />
                   ))}
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "rgba(255, 255, 255, 0.95)",
+                    backgroundColor: "rgba(255, 255, 255, 0.98)",
                     border: "1px solid #e2e8f0",
                     borderRadius: "12px",
-                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+                    padding: "12px",
                   }}
+                  formatter={(value: number) => [value.toLocaleString('id-ID'), 'Jumlah Lalin']}
                 />
               </PieChart>
             </ResponsiveContainer>
             <div className="flex flex-col gap-3">
-              <h3 className="font-semibold text-sm mb-2 text-slate-700">Total Lalin</h3>
+              <h3 className="font-semibold text-sm mb-3 text-slate-700">Distribusi Ruas</h3>
               {ruasData.map((entry, index) => (
-                <div key={entry.name} className="flex items-center gap-2">
+                <div 
+                  key={entry.name} 
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors group"
+                >
                   <div
-                    className="w-3 h-3 rounded-full"
+                    className="w-4 h-4 rounded-full shadow-sm group-hover:scale-110 transition-transform"
                     style={{ backgroundColor: RUAS_COLORS[index % RUAS_COLORS.length] }}
                   />
-                  <span className="text-sm text-slate-600">{entry.name}</span>
-                  <span className="text-sm font-semibold ml-auto">{entry.percentage}%</span>
+                  <div className="flex-1">
+                    <span className="text-sm font-medium text-slate-700">{entry.name}</span>
+                    <div className="text-xs text-slate-500">
+                      {entry.value.toLocaleString('id-ID')} lalin
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-bold text-slate-900">{entry.percentage}%</span>
+                  </div>
                 </div>
               ))}
             </div>
