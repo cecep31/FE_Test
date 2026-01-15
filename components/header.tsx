@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -10,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { logout } from "@/lib/auth";
 
 export default function Header() {
   return (
@@ -34,11 +34,9 @@ export default function Header() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuItem asChild>
-              <Link href="/login">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </Link>
+            <DropdownMenuItem onClick={logout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
