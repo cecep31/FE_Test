@@ -200,9 +200,9 @@ export default function Dashboard() {
     return (
       <g>
         <rect
-          x={x - 20}
+          x={x - 25}
           y={y - 10}
-          width={40}
+          width={50}
           height={20}
           fill="rgba(0, 0, 0, 0.7)"
           rx={4}
