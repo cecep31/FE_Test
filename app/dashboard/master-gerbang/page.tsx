@@ -45,12 +45,14 @@ interface GerbangResponse {
 }
 
 interface GerbangFormData {
+  id: number;
   IdCabang: number;
   NamaGerbang: string;
   NamaCabang: string;
 }
 
 const initialFormData: GerbangFormData = {
+  id: 0,
   IdCabang: 0,
   NamaGerbang: "",
   NamaCabang: "",
@@ -105,7 +107,7 @@ export default function MasterGerbang() {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "IdCabang" ? parseInt(value) || 0 : value,
+      [name]: name === "IdCabang" || name === "id" ? parseInt(value) || 0 : value,
     }));
   };
 
@@ -125,6 +127,7 @@ export default function MasterGerbang() {
 
   const openEditModal = (gerbang: Gerbang) => {
     setFormData({
+      id: gerbang.id,
       IdCabang: gerbang.IdCabang,
       NamaGerbang: gerbang.NamaGerbang,
       NamaCabang: gerbang.NamaCabang,
@@ -154,7 +157,10 @@ export default function MasterGerbang() {
     setSubmitting(true);
     try {
       if (editingId) {
-        await axiosInstance.put(`/gerbangs/${editingId}`, formData);
+        await axiosInstance.put(`/gerbangs`, {
+          ...formData,
+          id: editingId,
+        });
       } else {
         await axiosInstance.post("/gerbangs", formData);
       }
@@ -386,6 +392,26 @@ export default function MasterGerbang() {
           </SheetHeader>
           <form onSubmit={handleSubmit} className="space-y-6 mt-8 px-6">
             <div className="space-y-3">
+              <Label htmlFor="id" className="text-sm font-medium flex items-center gap-2 text-slate-700">
+                <Hash className="h-4 w-4 text-slate-400" />
+                ID
+              </Label>
+              <Input
+                id="id"
+                name="id"
+                type="number"
+                value={formData.id || ""}
+                onChange={handleInputChange}
+                placeholder="Masukkan ID"
+                className="h-11 transition-all duration-200 focus:border-blue-500 focus:ring-blue-500/20 border-slate-300"
+                required
+                disabled={editingId !== null}
+              />
+              {editingId && (
+                <p className="text-xs text-slate-500">ID tidak dapat diubah saat mengedit</p>
+              )}
+            </div>
+            <div className="space-y-3">
               <Label htmlFor="IdCabang" className="text-sm font-medium flex items-center gap-2 text-slate-700">
                 <Hash className="h-4 w-4 text-slate-400" />
                 ID Cabang
@@ -399,7 +425,11 @@ export default function MasterGerbang() {
                 placeholder="Masukkan ID cabang"
                 className="h-11 transition-all duration-200 focus:border-blue-500 focus:ring-blue-500/20 border-slate-300"
                 required
+                disabled={editingId !== null}
               />
+              {editingId && (
+                <p className="text-xs text-slate-500">ID Cabang tidak dapat diubah saat mengedit</p>
+              )}
             </div>
             <div className="space-y-3">
               <Label htmlFor="NamaGerbang" className="text-sm font-medium flex items-center gap-2 text-slate-700">

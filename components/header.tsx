@@ -13,7 +13,7 @@ import { logout } from "@/lib/auth";
 
 export default function Header() {
   return (
-    <header className="bg-white shadow-md p-4 flex justify-between items-center">
+    <header className="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-50">
       <div className="flex items-center">
         <img
           src="/next.svg"
