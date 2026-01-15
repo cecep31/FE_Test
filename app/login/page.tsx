@@ -1,17 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { api } from "@/lib/api";
+import { useState, useEffect } from "react";
+import { setCookie } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { useRouter, useSearchParams } from "next/navigation";
+import { isAuthenticated } from "@/lib/auth";
+import { axiosInstance } from "@/lib/fetch";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Check if user is already authenticated and redirect
+  useEffect(() => {
+    if (isAuthenticated()) {
+      const from = searchParams.get('from');
+      router.push(from || '/');
+    }
+  }, [router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,9 +31,19 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const response = await api.post<{ token: string }>("/auth/login", { username, password });
-      console.log("Login success:", response.data);
-      localStorage.setItem("token", response.data.token);
+      // Use axiosInstance for login
+      const response = await axiosInstance.post('/auth/login', {
+        username,
+        password,
+      });
+
+      // Set the token from the response
+      const { token } = response.data;
+      setCookie("token", token);
+
+      // Redirect to original page or home
+      const from = searchParams.get('from');
+      router.push(from || '/');
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -84,26 +106,6 @@ export default function LoginPage() {
           </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Checkbox id="remember-me" name="remember-me" />
-              <Label
-                htmlFor="remember-me"
-                className="text-sm text-gray-900 dark:text-gray-300"
-              >
-                Remember me
-              </Label>
-            </div>
-
-            <div className="text-sm">
-              <a
-                href="#"
-                className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
-              >
-                Forgot your password?
-              </a>
-            </div>
-          </div>
 
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
@@ -126,17 +128,6 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <div className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <p>
-            Don`t have an account?{" "}
-            <a
-              href="#"
-              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 transition-colors duration-200"
-            >
-              Sign up
-            </a>
-          </p>
-        </div>
       </div>
     </div>
   );
