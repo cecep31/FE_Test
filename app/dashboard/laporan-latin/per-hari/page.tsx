@@ -16,21 +16,31 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
   FilterIcon,
   SearchIcon,
 } from "lucide-react";
 
 interface LalinData {
   id: number;
+  IdCabang: number;
+  IdGerbang: number;
+  Tanggal: string;
   Shift: number;
+  IdGardu: number;
   Golongan: number;
+  IdAsalGerbang: number;
   Tunai: number;
+  DinasOpr: number;
+  DinasMitra: number;
+  DinasKary: number;
   eMandiri: number;
   eBri: number;
   eBni: number;
   eBca: number;
+  eNobu: number;
+  eDKI: number;
+  eMega: number;
+  eFlo: number;
 }
 
 interface LalinResponse {
@@ -98,7 +108,7 @@ export default function LaporanLatin() {
         {/* Filter skeleton */}
         <div className="bg-card text-card-foreground rounded-xl border shadow-sm p-6">
           <div className="flex flex-wrap items-end gap-4">
-            <div className="flex-1 min-w-[200px]">
+            <div className="flex-1 min-w-50">
               <Skeleton className="h-4 w-20 mb-2" />
               <Skeleton className="h-10 w-full" />
             </div>
@@ -163,6 +173,20 @@ export default function LaporanLatin() {
     }).format(value);
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  const getDayName = (dateString: string) => {
+    const date = new Date(dateString);
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    return days[date.getDay()];
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -176,7 +200,7 @@ export default function LaporanLatin() {
       {/* Filter Card */}
       <div className="bg-card text-card-foreground rounded-xl border shadow-sm p-6">
         <div className="flex flex-col sm:flex-row flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[200px] w-full sm:w-auto">
+          <div className="flex-1 min-w-50 w-full sm:w-auto">
             <Label htmlFor="tanggal" className="text-sm font-medium mb-2">
               Tanggal
             </Label>
@@ -207,13 +231,19 @@ export default function LaporanLatin() {
                     ID
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Tanggal
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Hari
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                     Shift
                   </th>
                   <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
                     Golongan
                   </th>
-                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
-                    Tunai
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Metode Pembayaran
                   </th>
                   <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
                     e-Mandiri
@@ -232,7 +262,7 @@ export default function LaporanLatin() {
               <tbody>
                 {data.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                    <td colSpan={10} className="p-8 text-center text-muted-foreground">
                       <div className="flex flex-col items-center gap-2">
                         <FilterIcon className="h-8 w-8 text-muted-foreground/50" />
                         <p>Tidak ada data ditemukan</p>
@@ -246,10 +276,12 @@ export default function LaporanLatin() {
                       className="border-b transition-colors hover:bg-muted/50 last:border-b-0"
                     >
                       <td className="p-4 align-middle">{item.id}</td>
+                      <td className="p-4 align-middle">{formatDate(item.Tanggal)}</td>
+                      <td className="p-4 align-middle">{getDayName(item.Tanggal)}</td>
                       <td className="p-4 align-middle">{item.Shift}</td>
                       <td className="p-4 align-middle">{item.Golongan}</td>
-                      <td className="p-4 align-middle text-right font-medium">
-                        {formatCurrency(item.Tunai)}
+                      <td className="p-4 align-middle">
+                        {item.Tunai > 0 ? "Tunai" : "Non Tunai"}
                       </td>
                       <td className="p-4 align-middle text-right">
                         {formatCurrency(item.eMandiri)}

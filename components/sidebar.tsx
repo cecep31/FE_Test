@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   DoorOpen,
   FileText,
-  LogOut,
   ChevronRight,
   Globe,
 } from "lucide-react";
@@ -14,7 +13,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -32,7 +30,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 
 const navItems = [
   {
@@ -133,25 +130,7 @@ export default function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="p-4">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="destructive"
-                className="w-full justify-start gap-2"
-                asChild
-              >
-                <Link href="/login">
-                  <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right" align="center">
-              Logout
-            </TooltipContent>
-          </Tooltip>
-        </SidebarFooter>
+
       </Sidebar>
     </TooltipProvider>
   );
