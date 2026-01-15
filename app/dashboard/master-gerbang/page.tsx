@@ -21,7 +21,7 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
-import { Pencil, Trash2, Search, Plus, X } from "lucide-react";
+import { Pencil, Trash2, Search, Plus, X, Building2, Hash, MapPin, AlertTriangle } from "lucide-react";
 
 interface Gerbang {
   id: number;
@@ -65,7 +65,7 @@ export default function MasterGerbang() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [formData, setFormData] = useState<GerbangFormData>(initialFormData);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteData, setDeleteData] = useState<{ id: number; IdCabang: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -134,8 +134,8 @@ export default function MasterGerbang() {
     setIsModalOpen(true);
   };
 
-  const openDeleteModal = (id: number) => {
-    setDeleteId(id);
+  const openDeleteModal = (gerbang: Gerbang) => {
+    setDeleteData({ id: gerbang.id, IdCabang: gerbang.IdCabang });
     setIsDeleteModalOpen(true);
   };
 
@@ -147,7 +147,7 @@ export default function MasterGerbang() {
 
   const closeDeleteModal = () => {
     setIsDeleteModalOpen(false);
-    setDeleteId(null);
+    setDeleteData(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -170,10 +170,10 @@ export default function MasterGerbang() {
   };
 
   const handleDelete = async () => {
-    if (!deleteId) return;
+    if (!deleteData) return;
     setSubmitting(true);
     try {
-      await axiosInstance.delete(`/gerbangs/${deleteId}`);
+      await axiosInstance.delete(`/gerbang`, { data: deleteData });
       await fetchGerbang();
       closeDeleteModal();
     } catch (err) {
@@ -346,7 +346,7 @@ export default function MasterGerbang() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => openDeleteModal(gerbang.id)}
+                                onClick={() => openDeleteModal(gerbang)}
                               >
                                 <Trash2 className="h-4 w-4 text-destructive" />
                               </Button>
@@ -368,81 +368,135 @@ export default function MasterGerbang() {
 
       {/* Create/Edit Modal */}
       <Sheet open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg">
-          <SheetHeader>
-            <SheetTitle>
-              {editingId ? "Edit Gerbang" : "Tambah Gerbang"}
+        <SheetContent side="right" className="w-full sm:max-w-md">
+          <SheetHeader className="space-y-1 pb-6 border-b">
+            <SheetTitle className="flex items-center gap-2 text-xl">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Building2 className="h-5 w-5 text-primary" />
+              </div>
+              {editingId ? "Edit Gerbang" : "Tambah Gerbang Baru"}
             </SheetTitle>
-            <SheetDescription>
+            <SheetDescription className="text-base">
               {editingId
                 ? "Perbarui informasi gerbang di bawah ini."
                 : "Tambahkan gerbang baru dengan mengisi form di bawah."}
             </SheetDescription>
           </SheetHeader>
-          <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+          <form onSubmit={handleSubmit} className="space-y-6 mt-8 px-6">
             <div className="space-y-3">
-              <Label htmlFor="IdCabang">ID Cabang</Label>
+              <Label htmlFor="IdCabang" className="text-sm font-medium flex items-center gap-2">
+                <Hash className="h-4 w-4 text-muted-foreground" />
+                ID Cabang
+              </Label>
               <Input
                 id="IdCabang"
                 name="IdCabang"
                 type="number"
                 value={formData.IdCabang || ""}
                 onChange={handleInputChange}
+                placeholder="Masukkan ID cabang"
+                className="h-11 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2"
                 required
               />
             </div>
             <div className="space-y-3">
-              <Label htmlFor="NamaGerbang">Nama Gerbang</Label>
+              <Label htmlFor="NamaGerbang" className="text-sm font-medium flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                Nama Gerbang
+              </Label>
               <Input
                 id="NamaGerbang"
                 name="NamaGerbang"
                 value={formData.NamaGerbang}
                 onChange={handleInputChange}
+                placeholder="Masukkan nama gerbang"
+                className="h-11 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2"
                 required
               />
             </div>
             <div className="space-y-3">
-              <Label htmlFor="NamaCabang">Nama Cabang</Label>
+              <Label htmlFor="NamaCabang" className="text-sm font-medium flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                Nama Cabang
+              </Label>
               <Input
                 id="NamaCabang"
                 name="NamaCabang"
                 value={formData.NamaCabang}
                 onChange={handleInputChange}
+                placeholder="Masukkan nama cabang"
+                className="h-11 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2"
                 required
               />
             </div>
-            <SheetFooter className="gap-2">
-              <Button type="button" variant="outline" onClick={closeModal}>
+            <div className="pt-6 flex gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeModal}
+                className="flex-1 h-11"
+              >
                 Batal
               </Button>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? "Menyimpan..." : "Simpan"}
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="flex-1 h-11"
+              >
+                {submitting ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                    Menyimpan...
+                  </span>
+                ) : (
+                  "Simpan"
+                )}
               </Button>
-            </SheetFooter>
+            </div>
           </form>
         </SheetContent>
       </Sheet>
 
       {/* Delete Confirmation Modal */}
       <Sheet open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <SheetContent side="bottom" className="sm:max-w-md mx-auto">
-          <SheetHeader>
-            <SheetTitle>Konfirmasi Hapus</SheetTitle>
-            <SheetDescription>
+        <SheetContent side="bottom" className="sm:max-w-md mx-auto rounded-t-xl">
+          <SheetHeader className="space-y-1 pb-4 border-b">
+            <SheetTitle className="flex items-center gap-2 text-xl">
+              <div className="p-2 rounded-lg bg-destructive/10">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              Konfirmasi Hapus
+            </SheetTitle>
+            <SheetDescription className="text-base">
               Apakah Anda yakin ingin menghapus gerbang ini? Tindakan ini tidak
               dapat dibatalkan.
             </SheetDescription>
           </SheetHeader>
-          <div className="flex justify-end gap-2 mt-6">
-            <Button variant="outline" onClick={closeDeleteModal}>
+          <div className="flex gap-4 mt-8 px-6">
+            <Button
+              variant="outline"
+              onClick={closeDeleteModal}
+              className="flex-1 h-11"
+            >
               Batal
             </Button>
             <Button
               variant="destructive"
               onClick={handleDelete}
               disabled={submitting}
+              className="flex-1 h-11"
             >
-              {submitting ? "Menghapus..." : "Hapus"}
+              {submitting ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                  Menghapus...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Trash2 className="h-4 w-4" />
+                  Hapus
+                </span>
+              )}
             </Button>
           </div>
         </SheetContent>
