@@ -185,12 +185,12 @@ export default function MasterGerbang() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 bg-slate-50 min-h-screen p-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">Master Gerbang</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Master Gerbang</h1>
         </div>
-        <div className="bg-card text-card-foreground rounded-xl border shadow-sm">
-          <div className="p-6 space-y-4">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+          <div className="space-y-4">
             {/* Search skeleton */}
             <div className="flex gap-4">
               <Skeleton className="h-10 w-full max-w-md" />
@@ -217,15 +217,14 @@ export default function MasterGerbang() {
 
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 bg-slate-50 min-h-screen p-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">Master Gerbang</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Master Gerbang</h1>
         </div>
-        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 text-center">
-          <p className="text-destructive font-medium">{error}</p>
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 text-center">
+          <p className="text-red-600 font-medium">{error}</p>
           <Button
-            variant="outline"
-            className="mt-4"
+            className="bg-slate-500 hover:bg-slate-600 text-white mt-4"
             onClick={() => {
               setError(null);
               setLoading(true);
@@ -241,63 +240,65 @@ export default function MasterGerbang() {
 
   return (
     <TooltipProvider>
-      <div className="space-y-6">
+      <div className="space-y-6 bg-slate-50 min-h-screen p-6">
         {/* Header */}
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight">Master Gerbang</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Master Gerbang</h1>
+          <p className="text-slate-500">
             Kelola data gerbang cabang dengan mudah
           </p>
         </div>
 
         {/* Actions Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between">
-          <div className="relative flex-1 max-w-md">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Search className="h-4 w-4 text-muted-foreground" />
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between">
+            <div className="relative flex-1 max-w-md">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <Search className="h-4 w-4 text-slate-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Cari Nama Gerbang..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-300 rounded-lg text-sm transition-all duration-200 focus:border-blue-500 focus:ring-blue-500/20 hover:border-slate-400"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
-            <input
-              type="text"
-              placeholder="Cari Nama Gerbang..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="w-full pl-10 pr-10 py-2.5 bg-background border border-input rounded-lg text-sm ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 hover:border-ring/50"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={clearSearch}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+            <Button onClick={openCreateModal} className="bg-slate-500 hover:bg-slate-600 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah Gerbang
+            </Button>
           </div>
-          <Button onClick={openCreateModal}>
-            <Plus className="h-4 w-4 mr-2" />
-            Tambah Gerbang
-          </Button>
         </div>
 
         {/* Table Card */}
-        <div className="bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-muted/50 border-b">
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  <th className="h-12 px-4 text-left align-middle font-medium text-slate-700">
                     ID
                   </th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  <th className="h-12 px-4 text-left align-middle font-medium text-slate-700">
                     ID Cabang
                   </th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  <th className="h-12 px-4 text-left align-middle font-medium text-slate-700">
                     Nama Gerbang
                   </th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                  <th className="h-12 px-4 text-left align-middle font-medium text-slate-700">
                     Nama Cabang
                   </th>
-                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                  <th className="h-12 px-4 text-right align-middle font-medium text-slate-700">
                     Aksi
                   </th>
                 </tr>
@@ -305,9 +306,9 @@ export default function MasterGerbang() {
               <tbody>
                 {gerbangData.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                    <td colSpan={5} className="p-8 text-center text-slate-500">
                       <div className="flex flex-col items-center gap-2">
-                        <Search className="h-8 w-8 text-muted-foreground/50" />
+                        <Search className="h-8 w-8 text-slate-400" />
                         <p>Tidak ada data gerbang ditemukan</p>
                       </div>
                     </td>
@@ -316,14 +317,14 @@ export default function MasterGerbang() {
                   gerbangData.map((gerbang) => (
                     <tr
                       key={`${gerbang.id}-${gerbang.IdCabang}`}
-                      className="border-b transition-colors hover:bg-muted/50 last:border-b-0"
+                      className="border-b transition-colors hover:bg-slate-50 last:border-b-0"
                     >
-                      <td className="p-4 align-middle">{gerbang.id}</td>
-                      <td className="p-4 align-middle">{gerbang.IdCabang}</td>
-                      <td className="p-4 align-middle font-medium">
+                      <td className="p-4 align-middle text-slate-600">{gerbang.id}</td>
+                      <td className="p-4 align-middle text-slate-600">{gerbang.IdCabang}</td>
+                      <td className="p-4 align-middle font-medium text-slate-800">
                         {gerbang.NamaGerbang}
                       </td>
-                      <td className="p-4 align-middle">{gerbang.NamaCabang}</td>
+                      <td className="p-4 align-middle text-slate-600">{gerbang.NamaCabang}</td>
                       <td className="p-4 align-middle text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Tooltip>
@@ -332,6 +333,7 @@ export default function MasterGerbang() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => openEditModal(gerbang)}
+                                className="hover:bg-slate-100"
                               >
                                 <Pencil className="h-4 w-4" />
                               </Button>
@@ -346,8 +348,9 @@ export default function MasterGerbang() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => openDeleteModal(gerbang)}
+                                className="hover:bg-red-50"
                               >
-                                <Trash2 className="h-4 w-4 text-destructive" />
+                                <Trash2 className="h-4 w-4 text-red-600" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -369,13 +372,13 @@ export default function MasterGerbang() {
       <Sheet open={isModalOpen} onOpenChange={setIsModalOpen}>
         <SheetContent side="right" className="w-full sm:max-w-md">
           <SheetHeader className="space-y-1 pb-6 border-b">
-            <SheetTitle className="flex items-center gap-2 text-xl">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Building2 className="h-5 w-5 text-primary" />
+            <SheetTitle className="flex items-center gap-2 text-xl text-slate-900">
+              <div className="p-2 rounded-lg bg-slate-100">
+                <Building2 className="h-5 w-5 text-slate-600" />
               </div>
               {editingId ? "Edit Gerbang" : "Tambah Gerbang Baru"}
             </SheetTitle>
-            <SheetDescription className="text-base">
+            <SheetDescription className="text-base text-slate-600">
               {editingId
                 ? "Perbarui informasi gerbang di bawah ini."
                 : "Tambahkan gerbang baru dengan mengisi form di bawah."}
@@ -383,8 +386,8 @@ export default function MasterGerbang() {
           </SheetHeader>
           <form onSubmit={handleSubmit} className="space-y-6 mt-8 px-6">
             <div className="space-y-3">
-              <Label htmlFor="IdCabang" className="text-sm font-medium flex items-center gap-2">
-                <Hash className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="IdCabang" className="text-sm font-medium flex items-center gap-2 text-slate-700">
+                <Hash className="h-4 w-4 text-slate-400" />
                 ID Cabang
               </Label>
               <Input
@@ -394,13 +397,13 @@ export default function MasterGerbang() {
                 value={formData.IdCabang || ""}
                 onChange={handleInputChange}
                 placeholder="Masukkan ID cabang"
-                className="h-11 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2"
+                className="h-11 transition-all duration-200 focus:border-blue-500 focus:ring-blue-500/20 border-slate-300"
                 required
               />
             </div>
             <div className="space-y-3">
-              <Label htmlFor="NamaGerbang" className="text-sm font-medium flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="NamaGerbang" className="text-sm font-medium flex items-center gap-2 text-slate-700">
+                <Building2 className="h-4 w-4 text-slate-400" />
                 Nama Gerbang
               </Label>
               <Input
@@ -409,13 +412,13 @@ export default function MasterGerbang() {
                 value={formData.NamaGerbang}
                 onChange={handleInputChange}
                 placeholder="Masukkan nama gerbang"
-                className="h-11 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2"
+                className="h-11 transition-all duration-200 focus:border-blue-500 focus:ring-blue-500/20 border-slate-300"
                 required
               />
             </div>
             <div className="space-y-3">
-              <Label htmlFor="NamaCabang" className="text-sm font-medium flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
+              <Label htmlFor="NamaCabang" className="text-sm font-medium flex items-center gap-2 text-slate-700">
+                <MapPin className="h-4 w-4 text-slate-400" />
                 Nama Cabang
               </Label>
               <Input
@@ -424,23 +427,22 @@ export default function MasterGerbang() {
                 value={formData.NamaCabang}
                 onChange={handleInputChange}
                 placeholder="Masukkan nama cabang"
-                className="h-11 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2"
+                className="h-11 transition-all duration-200 focus:border-blue-500 focus:ring-blue-500/20 border-slate-300"
                 required
               />
             </div>
             <div className="pt-6 flex gap-4">
               <Button
                 type="button"
-                variant="outline"
                 onClick={closeModal}
-                className="flex-1 h-11"
+                className="flex-1 h-11 border-slate-300 text-slate-700 hover:bg-slate-50"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 h-11"
+                className="flex-1 h-11 bg-slate-500 hover:bg-slate-600 text-white"
               >
                 {submitting ? (
                   <span className="flex items-center gap-2">
@@ -460,30 +462,28 @@ export default function MasterGerbang() {
       <Sheet open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <SheetContent side="bottom" className="sm:max-w-md mx-auto rounded-t-xl">
           <SheetHeader className="space-y-1 pb-4 border-b">
-            <SheetTitle className="flex items-center gap-2 text-xl">
-              <div className="p-2 rounded-lg bg-destructive/10">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+            <SheetTitle className="flex items-center gap-2 text-xl text-slate-900">
+              <div className="p-2 rounded-lg bg-red-100">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
               </div>
               Konfirmasi Hapus
             </SheetTitle>
-            <SheetDescription className="text-base">
+            <SheetDescription className="text-base text-slate-600">
               Apakah Anda yakin ingin menghapus gerbang ini? Tindakan ini tidak
               dapat dibatalkan.
             </SheetDescription>
           </SheetHeader>
           <div className="flex gap-4 mt-8 px-6">
             <Button
-              variant="outline"
               onClick={closeDeleteModal}
-              className="flex-1 h-11"
+              className="flex-1 h-11 border-slate-300 text-slate-700 hover:bg-slate-50"
             >
               Batal
             </Button>
             <Button
-              variant="destructive"
               onClick={handleDelete}
               disabled={submitting}
-              className="flex-1 h-11"
+              className="flex-1 h-11 bg-red-600 hover:bg-red-700 text-white"
             >
               {submitting ? (
                 <span className="flex items-center gap-2">
