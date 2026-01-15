@@ -90,9 +90,9 @@ export default function AppSidebar() {
                         >
                           <div className="flex items-center gap-2">
                             <item.icon className="h-4 w-4" />
-                            <span>{item.title}</span>
+                            <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                           </div>
-                          <ChevronRight className="h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
+                          <ChevronRight className="h-4 w-4 transition-transform group-data-[state=open]:rotate-90 group-data-[collapsible=icon]:hidden" />
                         </SidebarMenuButton>
                       </Collapsible.Trigger>
                       <Collapsible.Content asChild>
@@ -104,7 +104,7 @@ export default function AppSidebar() {
                                 isActive={isActive(subItem.href)}
                               >
                                 <Link href={subItem.href}>
-                                  {subItem.title}
+                                  <span className="group-data-[collapsible=icon]:hidden">{subItem.title}</span>
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
@@ -122,7 +122,7 @@ export default function AppSidebar() {
                     >
                       <Link href={item.href!}>
                         <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
+                        <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
