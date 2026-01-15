@@ -7,12 +7,13 @@ import {
   DoorOpen,
   FileText,
   ChevronRight,
-  Globe,
 } from "lucide-react";
+import * as Collapsible from "@radix-ui/react-collapsible";
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -23,13 +24,8 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarSeparator,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 const navItems = [
   {
@@ -60,33 +56,37 @@ export default function AppSidebar() {
   const isActive = (href: string) => pathname === href;
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <Sidebar className="border-r">
-        <SidebarHeader className="py-4">
-          <div className="flex items-center gap-2 px-4">
-            <img
-              src="/next.svg"
-              alt="App Logo"
-              className="h-10 w-10 object-contain"
-            />
-          </div>
-        </SidebarHeader>
+    <Sidebar collapsible="icon" className="border-r">
+      <SidebarHeader className="h-14 p-4">
+        <Link href="/" className="flex items-center gap-2">
+          <img
+            src="/next.svg"
+            alt="App Logo"
+            className="h-10 w-10 object-contain"
+          />
+          <span className="text-lg font-semibold group-data-[state=collapsed]:hidden">
+            Nextjs
+          </span>
+        </Link>
+      </SidebarHeader>
 
-        <SidebarSeparator />
+      <SidebarSeparator />
 
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    {item.items ? (
-                      <>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-2">
+              {navItems.map((item) =>
+                item.items ? (
+                  <Collapsible.Root asChild key={item.title}>
+                    <SidebarMenuItem>
+                      <Collapsible.Trigger asChild>
                         <SidebarMenuButton
                           className="w-full justify-between"
                           data-active={item.items.some((subItem) =>
                             isActive(subItem.href)
                           )}
+                          tooltip={item.title}
                         >
                           <div className="flex items-center gap-2">
                             <item.icon className="h-4 w-4" />
@@ -94,6 +94,8 @@ export default function AppSidebar() {
                           </div>
                           <ChevronRight className="h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
                         </SidebarMenuButton>
+                      </Collapsible.Trigger>
+                      <Collapsible.Content asChild>
                         <SidebarMenuSub>
                           {item.items.map((subItem) => (
                             <SidebarMenuSubItem key={subItem.href}>
@@ -101,37 +103,38 @@ export default function AppSidebar() {
                                 asChild
                                 isActive={isActive(subItem.href)}
                               >
-                                <Link href={subItem.href}>{subItem.title}</Link>
+                                <Link href={subItem.href}>
+                                  {subItem.title}
+                                </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
                           ))}
                         </SidebarMenuSub>
-                      </>
-                    ) : (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <SidebarMenuButton
-                            asChild
-                            isActive={isActive(item.href!)}
-                          >
-                            <Link href={item.href!}>
-                              <item.icon className="h-4 w-4" />
-                              <span>{item.title}</span>
-                            </Link>
-                          </SidebarMenuButton>
-                        </TooltipTrigger>
-                        <TooltipContent side="right" align="center">
-                          {item.title}
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
+                      </Collapsible.Content>
+                    </SidebarMenuItem>
+                  </Collapsible.Root>
+                ) : (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive(item.href!)}
+                      tooltip={item.title}
+                    >
+                      <Link href={item.href!}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
                   </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
-    </TooltipProvider>
+                )
+              )}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter className="p-2">
+        <SidebarTrigger />
+      </SidebarFooter>
+    </Sidebar>
   );
 }
