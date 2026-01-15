@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Sidebar() {
   return (
     <div className="w-64 bg-gray-800 text-white flex flex-col">
-      <div className="p-4 font-bold text-lg">My App</div>
+
       <nav className="flex-1 px-2 space-y-1">
         <Link
           href="/dashboard"
