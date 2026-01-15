@@ -276,10 +276,12 @@ export default function LaporanLatin() {
 
   return (
     <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+      <h1 className="text-2xl font-bold text-slate-800">Laporan Latin Per Hari</h1>
+
       {/* Filter Section */}
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
         <div className="flex flex-wrap gap-4 items-end">
-          <div className="flex-1 min-w-[200px] relative">
+          <div className="min-w-[200px] relative">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
               type="text"
@@ -289,7 +291,7 @@ export default function LaporanLatin() {
               className="w-full pl-10"
             />
           </div>
-          <div className="flex-1 min-w-[200px]">
+          <div className="min-w-[200px]">
             <Input
               type="date"
               placeholder="Tanggal"
