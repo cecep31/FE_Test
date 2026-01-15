@@ -1,58 +1,158 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  DoorOpen,
+  FileText,
+  LogOut,
+  ChevronRight,
+  Globe,
+} from "lucide-react";
 
-export default function Sidebar() {
-  const [isLaporanLatinOpen, setIsLaporanLatinOpen] = useState(false);
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarSeparator,
+} from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+
+const navItems = [
+  {
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Master Gerbang",
+    href: "/dashboard/master-gerbang",
+    icon: DoorOpen,
+  },
+  {
+    title: "Laporan Latin",
+    icon: FileText,
+    items: [
+      {
+        title: "Per Hari",
+        href: "/dashboard/laporan-latin/per-hari",
+      },
+    ],
+  },
+];
+
+export default function AppSidebar() {
+  const pathname = usePathname();
+
+  const isActive = (href: string) => pathname === href;
 
   return (
-    <div className="w-64 bg-gray-800 text-white flex flex-col">
-      <div className="h-16 flex items-center justify-center bg-gray-900">
-        <h1 className="text-xl font-bold">Dashboard</h1>
-      </div>
-      <nav className="flex-1 px-2 py-4 space-y-1">
-        <Link
-          href="/dashboard"
-          className="flex items-center px-2 py-2.5 rounded-md hover:bg-gray-700"
-        >
-          <Image src="/globe.svg" alt="Dashboard" width={24} height={24} />
-          <span className="ml-3">Dashboard</span>
-        </Link>
-        <Link
-          href="/dashboard/master-gerbang"
-          className="flex items-center px-2 py-2.5 rounded-md hover:bg-gray-700"
-        >
-          <Image src="/window.svg" alt="Master Gerbang" width={24} height={24} />
-          <span className="ml-3">Master Gerbang</span>
-        </Link>
-        <div>
-          <button
-            onClick={() => setIsLaporanLatinOpen(!isLaporanLatinOpen)}
-            className="w-full flex items-center px-2 py-2.5 rounded-md hover:bg-gray-700"
-          >
-            <Image src="/file.svg" alt="Laporan Latin" width={24} height={24} />
-            <span className="ml-3">Laporan Latin</span>
-            <span className="ml-auto">{isLaporanLatinOpen ? "▼" : "▶"}</span>
-          </button>
-          {isLaporanLatinOpen && (
-            <div className="ml-6 mt-1 space-y-1">
-              <Link
-                href="/dashboard/laporan-latin/per-hari"
-                className="flex items-center px-2 py-2 rounded-md hover:bg-gray-700 text-sm"
-              >
-                <span>Per Hari</span>
-              </Link>
+    <TooltipProvider delayDuration={0}>
+      <Sidebar className="border-r">
+        <SidebarHeader className="py-4">
+          <div className="flex items-center gap-2 px-4">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Globe className="h-5 w-5" />
             </div>
-          )}
-        </div>
-      </nav>
-      <div className="px-2 py-4">
-        <button className="w-full flex items-center px-2 py-2.5 rounded-md bg-red-600 hover:bg-red-700">
-          <span className="ml-3">Logout</span>
-        </button>
-      </div>
-    </div>
+            <span className="text-lg font-semibold">Dashboard</span>
+          </div>
+        </SidebarHeader>
+
+        <SidebarSeparator />
+
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    {item.items ? (
+                      <>
+                        <SidebarMenuButton
+                          className="w-full justify-between"
+                          data-active={item.items.some((subItem) =>
+                            isActive(subItem.href)
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </div>
+                          <ChevronRight className="h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
+                        </SidebarMenuButton>
+                        <SidebarMenuSub>
+                          {item.items.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.href}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={isActive(subItem.href)}
+                              >
+                                <Link href={subItem.href}>
+                                  {subItem.title}
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </>
+                    ) : (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SidebarMenuButton asChild isActive={isActive(item.href!)}>
+                            <Link href={item.href!}>
+                              <item.icon className="h-4 w-4" />
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" align="center">
+                          {item.title}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter className="p-4">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="destructive"
+                className="w-full justify-start gap-2"
+                asChild
+              >
+                <Link href="/login">
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" align="center">
+              Logout
+            </TooltipContent>
+          </Tooltip>
+        </SidebarFooter>
+      </Sidebar>
+    </TooltipProvider>
   );
 }

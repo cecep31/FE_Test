@@ -1,34 +1,78 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { axiosInstance } from '@/lib/fetch';
+import { useState, useEffect } from "react";
+import { axiosInstance } from "@/lib/fetch";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  FilterIcon,
+  SearchIcon,
+} from "lucide-react";
+
+interface LalinData {
+  id: number;
+  Shift: number;
+  Golongan: number;
+  Tunai: number;
+  eMandiri: number;
+  eBri: number;
+  eBni: number;
+  eBca: number;
+}
+
+interface LalinResponse {
+  status: boolean;
+  message: string;
+  code: number;
+  data: {
+    total_pages: number;
+    current_page: number;
+    count: number;
+    rows: {
+      count: number;
+      rows: LalinData[];
+    };
+  };
+}
 
 export default function LaporanLatin() {
-  const [data, setData] = useState<{
-    id: number;
-    Shift: number;
-    Golongan: number;
-    Tunai: number;
-    eMandiri: number;
-    eBri: number;
-    eBni: number;
-    eBca: number;
-  }[]>([]);
+  const [data, setData] = useState<LalinData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [startDate, setStartDate] = useState<string>('2023-11-01');
+  const [startDate, setStartDate] = useState<string>("2023-11-01");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        const response = await axiosInstance.get(`/lalins?tanggal=${startDate}&page=${currentPage}`);
-        setData(response.data.data.rows.rows);
-        setTotalPages(response.data.data.total_pages);
-        setLoading(false);
+        const response = await axiosInstance.get<LalinResponse>(
+          `/lalins?tanggal=${startDate}&page=${currentPage}`
+        );
+        const result = response.data;
+        if (result.status && result.data?.rows?.rows) {
+          setData(result.data.rows.rows);
+          setTotalPages(result.data.total_pages);
+        } else {
+          setError(result.message || "Failed to fetch data");
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        setError(err instanceof Error ? err.message : "An unknown error occurred");
+      } finally {
         setLoading(false);
       }
     };
@@ -38,117 +82,246 @@ export default function LaporanLatin() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    setLoading(true);
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold tracking-tight">Laporan Latin</h1>
+        </div>
+        {/* Filter skeleton */}
+        <div className="bg-card text-card-foreground rounded-xl border shadow-sm p-6">
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <Skeleton className="h-4 w-20 mb-2" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <Skeleton className="h-10 w-24" />
+          </div>
+        </div>
+        {/* Table skeleton */}
+        <div className="bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden">
+          <div className="p-6 space-y-4">
+            <Skeleton className="h-6 w-40" />
+            <Separator />
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex gap-4">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold tracking-tight">Laporan Latin</h1>
+        </div>
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 text-center">
+          <p className="text-destructive font-medium">{error}</p>
+          <Button
+            variant="outline"
+            className="mt-4"
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              setStartDate("2023-11-01");
+              setCurrentPage(1);
+            }}
+          >
+            Coba Lagi
+          </Button>
+        </div>
+      </div>
+    );
   }
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Laporan Latin</h1>
-      <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 max-w-md">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-          </svg>
-          Filter Data
-        </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <label htmlFor="tanggal" className="block text-sm font-medium text-gray-700 mb-1">
-                Tanggal
-              </label>
-              <input
-                type="date"
-                id="tanggal"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
-              />
-            </div>
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 shadow-sm"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              Filter
-            </button>
-          </div>
-        </form>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight">Laporan Latin</h1>
+        <p className="text-muted-foreground">
+          Laporan data transaksi harian berdasarkan tanggal
+        </p>
       </div>
-      <div className="mt-6 bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Data</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shift</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Golongan</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tunai</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">e-Mandiri</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">e-BRI</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">e-BNI</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">e-BCA</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {data.map((item) => (
-                <tr key={item.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.Shift}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.Golongan}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.Tunai}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.eMandiri}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.eBri}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.eBni}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.eBca}</td>
+
+      {/* Filter Card */}
+      <div className="bg-card text-card-foreground rounded-xl border shadow-sm p-6">
+        <div className="flex flex-col sm:flex-row flex-wrap items-end gap-4">
+          <div className="flex-1 min-w-[200px] w-full sm:w-auto">
+            <Label htmlFor="tanggal" className="text-sm font-medium mb-2">
+              Tanggal
+            </Label>
+            <Input
+              type="date"
+              id="tanggal"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <Button onClick={handleSubmit} className="w-full sm:w-auto">
+            <SearchIcon className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
+        </div>
+      </div>
+
+      {/* Data Table */}
+      <div className="bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden">
+        <div className="p-6">
+          <h2 className="text-lg font-semibold mb-4">Data Transaksi</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-muted/50 border-b">
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    ID
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Shift
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                    Golongan
+                  </th>
+                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                    Tunai
+                  </th>
+                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                    e-Mandiri
+                  </th>
+                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                    e-BRI
+                  </th>
+                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                    e-BNI
+                  </th>
+                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+                    e-BCA
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                      <div className="flex flex-col items-center gap-2">
+                        <FilterIcon className="h-8 w-8 text-muted-foreground/50" />
+                        <p>Tidak ada data ditemukan</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  data.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="border-b transition-colors hover:bg-muted/50 last:border-b-0"
+                    >
+                      <td className="p-4 align-middle">{item.id}</td>
+                      <td className="p-4 align-middle">{item.Shift}</td>
+                      <td className="p-4 align-middle">{item.Golongan}</td>
+                      <td className="p-4 align-middle text-right font-medium">
+                        {formatCurrency(item.Tunai)}
+                      </td>
+                      <td className="p-4 align-middle text-right">
+                        {formatCurrency(item.eMandiri)}
+                      </td>
+                      <td className="p-4 align-middle text-right">
+                        {formatCurrency(item.eBri)}
+                      </td>
+                      <td className="p-4 align-middle text-right">
+                        {formatCurrency(item.eBni)}
+                      </td>
+                      <td className="p-4 align-middle text-right">
+                        {formatCurrency(item.eBca)}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div className="mt-4 flex justify-center">
-          <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <span>Previous</span>
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === page ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-              >
-                {page}
-              </button>
-            ))}
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <span>Next</span>
-            </button>
-          </nav>
-        </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="border-t p-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                    className={
+                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                    }
+                  />
+                </PaginationItem>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum: number;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        onClick={() => handlePageChange(pageNum)}
+                        isActive={currentPage === pageNum}
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() =>
+                      handlePageChange(Math.min(totalPages, currentPage + 1))
+                    }
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
     </div>
   );
